@@ -30,30 +30,52 @@ function Login() {
   };
 
   return (
-    <div>
-      <h1>Login</h1>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div>
-          <label>Username:</label>
+    <div className="container mt-5" style={{ maxWidth: 400 }}>
+      <h1 className="mb-4">Login</h1>
+      <form onSubmit={handleSubmit(onSubmit)} noValidate>
+        <div className="mb-3">
+          <label htmlFor="username" className="form-label">
+            Username
+          </label>
           <input
-            {...register('username', { required: 'Username is required' })}
+            id="username"
             type="text"
+            className={`form-control ${errors.username ? 'is-invalid' : ''}`}
+            {...register('username', { required: 'Username is required' })}
+            disabled={isSubmitting}
           />
-          {errors.username && <p>{errors.username.message}</p>}
+          {errors.username && (
+            <div className="invalid-feedback">{errors.username.message}</div>
+          )}
         </div>
 
-        <div>
-          <label>Password:</label>
+        <div className="mb-3">
+          <label htmlFor="password" className="form-label">
+            Password
+          </label>
           <input
-            {...register('password', { required: 'Password is required' })}
+            id="password"
             type="password"
+            className={`form-control ${errors.password ? 'is-invalid' : ''}`}
+            {...register('password', { required: 'Password is required' })}
+            disabled={isSubmitting}
           />
-          {errors.password && <p>{errors.password.message}</p>}
+          {errors.password && (
+            <div className="invalid-feedback">{errors.password.message}</div>
+          )}
         </div>
 
-        {loginError && <p style={{ color: 'red' }}>{loginError}</p>}
+        {loginError && (
+          <div className="alert alert-danger" role="alert">
+            {loginError}
+          </div>
+        )}
 
-        <button type="submit" disabled={isSubmitting}>
+        <button
+          type="submit"
+          className="btn btn-primary w-100"
+          disabled={isSubmitting}
+        >
           {isSubmitting ? 'Logging in...' : 'Login'}
         </button>
       </form>
