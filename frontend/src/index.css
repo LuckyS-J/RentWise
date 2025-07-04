@@ -45,3 +45,89 @@ html, body, #root {
   color: #ffdada;
   border: none;
 }
+
+.custom-card {
+  background-color: #0f3460 !important;
+  color: #ffffff !important;
+  border: 1px solid #4a47a3 !important;
+  border-radius: 10px !important;
+  box-shadow: 0 0 10px #4a47a3 !important;
+}
+
+.custom-card .card-body {
+  background-color: transparent !important;
+  color: inherit !important;
+}
+
+.custom-card-header {
+  background-color: #16213e;
+  color: #ffffff;
+  border-bottom: 1px solid #4a47a3;
+  font-weight: bold;
+  padding: 10px 15px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.custom-card-body {
+  padding: 15px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.list-group-item {
+  background-color: transparent;
+  border-color: #4a47a3;
+  color: #ffffff !important;
+}
+
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+.status-available {
+  background-color: #1f5f3f;
+  color: #b8ffcc;
+}
+
+.status-rented {
+  background-color: #7a1f1f;
+  color: #ffdada;
+}
+
+.status-under_renovation {
+  background-color: #664d03;
+  color: #ffefb0;
+}
+
+.login-box {
+  background-color: #16213e;
+  color: #c8c8ff;
+}
+
+.dark-input {
+  background-color: #1f2a40 !important;
+  color: #ffffff !important;
+  border: 1px solid #4a47a3;
+  font-size: 0.95rem;
+  padding: 6px 10px;
+  height: 38px;
+}
+
+.dark-input::placeholder {
+  color: #aaaaaa;
+}
+
+.dark-input:focus {
+  border-color: #7c4dff;
+  box-shadow: 0 0 0 0.15rem rgba(124, 77, 255, 0.25);
+}
+
+.form-label {
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+}

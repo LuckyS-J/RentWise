@@ -1,17 +1,41 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import LogoutButton from '../components/logoutButton';
 import { fetchProperties } from '../api/property';
+import { fetchLeases } from '../api/lease';
+import { fetchPayments } from '../api/payment';
+import AppNavbar from '../components/navbar';
+import { Card, Row, Col, Container, Badge } from 'react-bootstrap';
 
 interface Property {
   id: number;
-  name: string;
   address: string;
+  property_type: string;
+  status: string;
+  area: string;
+  num_of_rooms: number;
+  description: string;
+}
+
+interface Lease {
+  id: number;
+  start_date: string;
+  end_date: string;
+  rate_amount: string;
+  active_lease: boolean;
+}
+
+interface Payment {
+  id: number;
+  amount: string;
+  payment_date: string;
+  is_paid: boolean;
 }
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [properties, setProperties] = useState<Property[]>([]);
+  const [leases, setLeases] = useState<Lease[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -21,32 +45,106 @@ const Dashboard = () => {
       return;
     }
 
-    const loadProperties = async () => {
+    const fetchAllData = async () => {
       try {
-        const data = await fetchProperties(access);
-        setProperties(data);
+        const [props, ls, pays] = await Promise.all([
+          fetchProperties(access),
+          fetchLeases(access),
+          fetchPayments(access),
+        ]);
+        setProperties(props);
+        setLeases(ls);
+        setPayments(pays);
       } catch (err) {
-        setError('Failed to load properties');
+        setError('Failed to load dashboard data.');
       }
     };
 
-    loadProperties();
+    fetchAllData();
   }, [navigate]);
 
   return (
-    <div style={{ padding: '1rem' }}>
-      <h2>Dashboard</h2>
-      <LogoutButton />
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <ul>
-        {properties.length === 0 && !error && <p>No properties found.</p>}
-        {properties.map((prop) => (
-          <li key={prop.id}>
-            <strong>{prop.name}</strong> — {prop.address}
-          </li>
-        ))}
-      </ul>
-    </div>
+    <>
+      <AppNavbar />
+      <Container className="pt-4 mt-5">
+        <h2 className="text-center mb-4">Dashboard</h2>
+        {error && <div className="alert alert-danger">{error}</div>}
+
+        <Row className="g-4">
+          <Col md={4}>
+            <Card className="custom-card h-100">
+              <Card.Body>
+                <Card.Title>Properties</Card.Title>
+                <ul style={{ listStyleType: 'none', paddingLeft: 0 }}>
+                  {properties.map((p) => (
+                    <li key={p.id} style={{ marginBottom: '1rem' }}>
+                      <div>
+                        <strong>{p.address}</strong>{' '}
+                        <Badge
+                          bg={
+                            p.status === 'available'
+                              ? 'success'
+                              : p.status === 'rented'
+                              ? 'danger'
+                              : 'warning'
+                          }
+                        >
+                          {p.status}
+                        </Badge>
+                      </div>
+                      <div style={{ fontSize: '0.85rem', color: '#ccc' }}>
+                        {p.description}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </Card.Body>
+            </Card>
+          </Col>
+
+          <Col md={4}>
+            <Card className="custom-card h-100">
+              <Card.Body>
+                <Card.Title>Leases</Card.Title>
+                <ul>
+                  {leases.map((l) => (
+                    <li key={l.id}>
+                      {l.start_date} → {l.end_date}{' | '}
+                      {l.rate_amount} PLN{' | '}
+                      {l.active_lease ? (
+                        <Badge bg="success">Active</Badge>
+                      ) : (
+                        <Badge bg="secondary">Inactive</Badge>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </Card.Body>
+            </Card>
+          </Col>
+
+          <Col md={4}>
+            <Card className="custom-card h-100">
+              <Card.Body>
+                <Card.Title>Payments</Card.Title>
+                <ul>
+                  {payments.map((p) => (
+                    <li key={p.id}>
+                      {p.payment_date}: {p.amount} PLN{' '}
+                      {p.is_paid ? (
+                        <Badge bg="success">Paid</Badge>
+                      ) : (
+                        <Badge bg="danger">Unpaid</Badge>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+      </Container>
+    </>
   );
 };
 
