@@ -74,7 +74,7 @@ function Login() {
 
           <button
             type="submit"
-            className="btn btn-primary w-100"
+            className="btn btn-custom w-100"
             disabled={isSubmitting}
           >
             {isSubmitting ? 'Logging in...' : 'Login'}

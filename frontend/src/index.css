@@ -131,3 +131,17 @@ html, body, #root {
   font-size: 0.9rem;
   margin-bottom: 0.25rem;
 }
+
+.btn-custom {
+  background-color: #4e3184 !important;
+  border-color: #4e3184 !important;
+  color: #fff !important;
+  transition: background-color 0.3s ease !important;
+}
+
+.btn-custom:hover,
+.btn-custom:focus {
+  background-color: #653b9f !important;
+  border-color: #653b9f !important;
+  color: #fff !important;
+}
