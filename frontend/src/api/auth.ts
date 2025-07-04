@@ -1,15 +1,16 @@
+import axios from 'axios'
+
 export const loginUser = async (username: string, password: string) => {
-  const response = await fetch('http://localhost:8000/users/api/token/', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ username, password }),
-  });
+  try {
+    const response = await axios.post('http://localhost:8000/users/api/token/', {
+      username,
+      password,
+    });
 
-  if (!response.ok) {
-    throw new Error('Invalid credentials');
+    return response.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.detail || 'Login failed. Please try again.'
+    );
   }
-
-  return await response.json();
 };

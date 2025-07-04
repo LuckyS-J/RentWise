@@ -1,46 +1,64 @@
-import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { loginUser } from '../api/auth';
+import { useState } from 'react';
 
-const Login = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+type LoginFormInputs = {
+  username: string;
+  password: string;
+};
+
+function Login() {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormInputs>();
+
   const navigate = useNavigate();
+  const [loginError, setLoginError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: LoginFormInputs) => {
     try {
-      const data = await loginUser(username, password);
-      localStorage.setItem('access', data.access);
-      localStorage.setItem('refresh', data.refresh);
+      const res = await loginUser(data.username, data.password);
+      localStorage.setItem('access', res.access);
+      localStorage.setItem('refresh', res.refresh);
       navigate('/dashboard');
-    } catch (err) {
-      setError('Login failed. Please check your username and password.');
+    } catch (err: any) {
+      setLoginError(err.message);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Login</h2>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <input
-        type="text"
-        placeholder="Username"
-        value={username}
-        onChange={e => setUsername(e.target.value)}
-        required
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={e => setPassword(e.target.value)}
-        required
-      />
-      <button type="submit">Log In</button>
-    </form>
+    <div>
+      <h1>Login</h1>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div>
+          <label>Username:</label>
+          <input
+            {...register('username', { required: 'Username is required' })}
+            type="text"
+          />
+          {errors.username && <p>{errors.username.message}</p>}
+        </div>
+
+        <div>
+          <label>Password:</label>
+          <input
+            {...register('password', { required: 'Password is required' })}
+            type="password"
+          />
+          {errors.password && <p>{errors.password.message}</p>}
+        </div>
+
+        {loginError && <p style={{ color: 'red' }}>{loginError}</p>}
+
+        <button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'Logging in...' : 'Login'}
+        </button>
+      </form>
+    </div>
   );
-};
+}
 
 export default Login;
