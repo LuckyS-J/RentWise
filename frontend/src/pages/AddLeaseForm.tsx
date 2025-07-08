@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Form, Button, Container, Card, Alert } from 'react-bootstrap';
 
 interface Property {
   id: number;
@@ -16,6 +15,7 @@ const AddLeaseForm = () => {
   const [activeLease, setActiveLease] = useState(false);
   const [properties, setProperties] = useState<Property[]>([]);
   const [error, setError] = useState('');
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const access = localStorage.getItem('access');
@@ -24,7 +24,6 @@ const AddLeaseForm = () => {
       return;
     }
 
-    // Fetch user properties for selection
     fetch('http://localhost:8000/properties/api/', {
       headers: {
         Authorization: `Bearer ${access}`,
@@ -35,8 +34,21 @@ const AddLeaseForm = () => {
       .catch(() => setError('Failed to load properties.'));
   }, [navigate]);
 
+  const validateForm = () => {
+    const errors: Record<string, string> = {};
+    if (propertyId === '') errors.propertyId = 'Property is required';
+    if (!startDate) errors.startDate = 'Start Date is required';
+    if (!endDate) errors.endDate = 'End Date is required';
+    if (!rateAmount) errors.rateAmount = 'Rate Amount is required';
+    else if (Number(rateAmount) < 0) errors.rateAmount = 'Rate Amount cannot be negative';
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateForm()) return;
+
     const access = localStorage.getItem('access');
     if (!access) return;
 
@@ -66,83 +78,105 @@ const AddLeaseForm = () => {
   };
 
   return (
-    <Container className="pt-4 mt-5" style={{ maxWidth: '600px' }}>
-      <Card className="custom-card">
-        <Card.Body>
-          <h3 className="mb-4 text-center">Add Lease</h3>
+    <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
+      <div className="container" style={{ maxWidth: 600 }}>
+        <h3 className="mb-4 text-center">Add Lease</h3>
 
-          {error && <Alert variant="danger">{error}</Alert>}
+        {error && <div className="alert alert-danger">{error}</div>}
 
-          <Form onSubmit={handleSubmit}>
-            <Form.Group className="mb-3">
-              <Form.Label>Property</Form.Label>
-              <Form.Select
-                value={propertyId}
-                onChange={(e) => setPropertyId(Number(e.target.value))}
-                required
-              >
-                <option value="">-- Select property --</option>
-                {properties.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.address}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
+        <form onSubmit={handleSubmit} noValidate>
+          <div className="mb-3">
+            <label htmlFor="property" className="form-label">Property</label>
+            <select
+              id="property"
+              className={`form-select dark-input ${validationErrors.propertyId ? 'is-invalid' : ''}`}
+              value={propertyId}
+              onChange={(e) => setPropertyId(Number(e.target.value))}
+              required
+            >
+              <option value="">-- Select property --</option>
+              {properties.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.address}
+                </option>
+              ))}
+            </select>
+            {validationErrors.propertyId && (
+              <div className="invalid-feedback">{validationErrors.propertyId}</div>
+            )}
+          </div>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Start Date</Form.Label>
-              <Form.Control
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                required
-              />
-            </Form.Group>
+          <div className="mb-3">
+            <label htmlFor="startDate" className="form-label">Start Date</label>
+            <input
+              id="startDate"
+              type="date"
+              className={`form-control dark-input ${validationErrors.startDate ? 'is-invalid' : ''}`}
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              required
+            />
+            {validationErrors.startDate && (
+              <div className="invalid-feedback">{validationErrors.startDate}</div>
+            )}
+          </div>
 
-            <Form.Group className="mb-3">
-              <Form.Label>End Date</Form.Label>
-              <Form.Control
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                required
-              />
-            </Form.Group>
+          <div className="mb-3">
+            <label htmlFor="endDate" className="form-label">End Date</label>
+            <input
+              id="endDate"
+              type="date"
+              className={`form-control dark-input ${validationErrors.endDate ? 'is-invalid' : ''}`}
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              required
+            />
+            {validationErrors.endDate && (
+              <div className="invalid-feedback">{validationErrors.endDate}</div>
+            )}
+          </div>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Rate Amount (PLN)</Form.Label>
-              <Form.Control
-                type="number"
-                min="0"
-                step="0.01"
-                value={rateAmount}
-                onChange={(e) => setRateAmount(e.target.value)}
-                required
-              />
-            </Form.Group>
+          <div className="mb-3">
+            <label htmlFor="rateAmount" className="form-label">Rate Amount (PLN)</label>
+            <input
+              id="rateAmount"
+              type="number"
+              min="0"
+              step="0.01"
+              className={`form-control dark-input ${validationErrors.rateAmount ? 'is-invalid' : ''}`}
+              value={rateAmount}
+              onChange={(e) => setRateAmount(e.target.value)}
+              required
+            />
+            {validationErrors.rateAmount && (
+              <div className="invalid-feedback">{validationErrors.rateAmount}</div>
+            )}
+          </div>
 
-            <Form.Group className="mb-3">
-              <Form.Check
-                type="checkbox"
-                label="Active Lease"
-                checked={activeLease}
-                onChange={(e) => setActiveLease(e.target.checked)}
-              />
-            </Form.Group>
+          <div className="form-check mb-3">
+            <input
+              id="activeLease"
+              type="checkbox"
+              className="form-check-input"
+              checked={activeLease}
+              onChange={(e) => setActiveLease(e.target.checked)}
+            />
+            <label htmlFor="activeLease" className="form-check-label">
+              Active Lease
+            </label>
+          </div>
 
-            <div className="d-flex justify-content-between">
-              <Button variant="secondary" onClick={() => navigate('/')}>
-                Cancel
-              </Button>
-              <Button type="submit" variant="primary">
-                Add Lease
-              </Button>
-            </div>
-          </Form>
-        </Card.Body>
-      </Card>
-    </Container>
+          <div className="d-flex justify-content-between">
+            <button type="button" className="btn btn-secondary" onClick={() => navigate('/')}>
+              Cancel
+            </button>
+            <button type="submit" className="btn btn-custom">
+              Add Lease
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 };
 

@@ -157,9 +157,14 @@ const EditProperty = () => {
               />
             </div>
 
-            <button type="submit" className="btn btn-custom w-100">
-              Save Changes
-            </button>
+            <div className="d-flex justify-content-between">
+              <button type="button" className="btn btn-secondary" onClick={() => navigate('/')}>
+                Cancel
+              </button>
+              <button type="submit" className="btn btn-custom">
+                Save Changes
+              </button>
+            </div>
           </form>
         </div>
       </div>

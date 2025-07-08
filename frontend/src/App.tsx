@@ -5,6 +5,8 @@ import AddPropertyForm from './pages/property-add';
 import EditProperty from './pages/property-edit';
 import AddLeaseForm from './pages/AddLeaseForm'
 import EditLeaseForm from './pages/EditLeaseForm';
+import AddPaymentForm from './pages/AddPaymentForm';
+import EditPaymenForm from './pages/EditPaymentForm';
 
 function App() {
   return (
@@ -16,6 +18,8 @@ function App() {
         <Route path="/properties/:id/edit" element={<EditProperty />} />
         <Route path="/leases/add" element={<AddLeaseForm />} />
         <Route path="/leases/:id/edit" element={<EditLeaseForm />} />
+        <Route path="/payments/add" element={<AddPaymentForm />} />
+        <Route path="/payments/:id/edit" element={<EditPaymenForm />} />
       </Routes>
     </Router>
   );

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Form, Button, Container, Spinner, Alert } from 'react-bootstrap';
 
 interface Lease {
   id: number;
@@ -17,6 +16,7 @@ const EditLease = () => {
   const [lease, setLease] = useState<Lease | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const fetchLease = async () => {
@@ -37,7 +37,7 @@ const EditLease = () => {
 
         const data = await res.json();
         setLease(data);
-      } catch (err) {
+      } catch {
         setError('Failed to load lease.');
       } finally {
         setLoading(false);
@@ -47,7 +47,7 @@ const EditLease = () => {
     fetchLease();
   }, [id, navigate]);
 
-  const handleChange = (e: React.ChangeEvent<any>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     setLease((prev) =>
       prev
@@ -59,8 +59,22 @@ const EditLease = () => {
     );
   };
 
+  const validateForm = () => {
+    const errors: Record<string, string> = {};
+    if (!lease) return false;
+    if (!lease.property) errors.property = 'Property ID is required';
+    if (!lease.start_date) errors.start_date = 'Start Date is required';
+    if (!lease.end_date) errors.end_date = 'End Date is required';
+    if (!lease.rate_amount) errors.rate_amount = 'Rate Amount is required';
+    else if (Number(lease.rate_amount) < 0) errors.rate_amount = 'Rate Amount cannot be negative';
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateForm()) return;
+
     const access = localStorage.getItem('access');
     if (!access || !lease) return;
 
@@ -76,93 +90,126 @@ const EditLease = () => {
 
       if (!res.ok) throw new Error('Failed to update lease');
 
-      navigate('/dashboard');
-    } catch (err) {
+      navigate('/');
+    } catch {
       setError('Failed to update lease.');
     }
   };
 
   if (loading) {
     return (
-      <Container className="pt-5 text-center">
-        <Spinner animation="border" />
-      </Container>
+      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
+        <div className="spinner-border" role="status" />
+      </div>
     );
   }
 
   if (!lease) {
     return (
-      <Container className="pt-5">
-        <Alert variant="danger">{error || 'Lease not found.'}</Alert>
-      </Container>
+      <div className="container pt-5">
+        <div className="alert alert-danger">{error || 'Lease not found.'}</div>
+      </div>
     );
   }
 
   return (
-    <Container className="pt-5" style={{ maxWidth: '600px' }}>
-      <h2 className="mb-4">Edit Lease</h2>
-      {error && <Alert variant="danger">{error}</Alert>}
+    <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
+      <div className="container" style={{ maxWidth: 600 }}>
+        <h2 className="mb-4 text-center">Edit Lease</h2>
+        {error && <div className="alert alert-danger">{error}</div>}
 
-      <Form onSubmit={handleSubmit}>
-        <Form.Group controlId="property">
-          <Form.Label>Property ID</Form.Label>
-          <Form.Control
-            type="number"
-            name="property"
-            value={lease.property}
-            onChange={handleChange}
-            required
-          />
-        </Form.Group>
+        <form onSubmit={handleSubmit} noValidate>
+          <div className="mb-3">
+            <label htmlFor="property" className="form-label">Property ID</label>
+            <input
+              id="property"
+              name="property"
+              type="number"
+              className={`form-control dark-input ${validationErrors.property ? 'is-invalid' : ''}`}
+              value={lease.property}
+              onChange={handleChange}
+              required
+            />
+            {validationErrors.property && (
+              <div className="invalid-feedback">{validationErrors.property}</div>
+            )}
+          </div>
 
-        <Form.Group controlId="start_date" className="mt-3">
-          <Form.Label>Start Date</Form.Label>
-          <Form.Control
-            type="date"
-            name="start_date"
-            value={lease.start_date}
-            onChange={handleChange}
-            required
-          />
-        </Form.Group>
+          <div className="mb-3">
+            <label htmlFor="start_date" className="form-label">Start Date</label>
+            <input
+              id="start_date"
+              name="start_date"
+              type="date"
+              className={`form-control dark-input ${validationErrors.start_date ? 'is-invalid' : ''}`}
+              value={lease.start_date}
+              onChange={handleChange}
+              required
+            />
+            {validationErrors.start_date && (
+              <div className="invalid-feedback">{validationErrors.start_date}</div>
+            )}
+          </div>
 
-        <Form.Group controlId="end_date" className="mt-3">
-          <Form.Label>End Date</Form.Label>
-          <Form.Control
-            type="date"
-            name="end_date"
-            value={lease.end_date}
-            onChange={handleChange}
-            required
-          />
-        </Form.Group>
+          <div className="mb-3">
+            <label htmlFor="end_date" className="form-label">End Date</label>
+            <input
+              id="end_date"
+              name="end_date"
+              type="date"
+              className={`form-control dark-input ${validationErrors.end_date ? 'is-invalid' : ''}`}
+              value={lease.end_date}
+              onChange={handleChange}
+              required
+            />
+            {validationErrors.end_date && (
+              <div className="invalid-feedback">{validationErrors.end_date}</div>
+            )}
+          </div>
 
-        <Form.Group controlId="rate_amount" className="mt-3">
-          <Form.Label>Rate Amount (PLN)</Form.Label>
-          <Form.Control
-            type="number"
-            name="rate_amount"
-            value={lease.rate_amount}
-            onChange={handleChange}
-            required
-          />
-        </Form.Group>
+          <div className="mb-3">
+            <label htmlFor="rate_amount" className="form-label">Rate Amount (PLN)</label>
+            <input
+              id="rate_amount"
+              name="rate_amount"
+              type="number"
+              min="0"
+              step="0.01"
+              className={`form-control dark-input ${validationErrors.rate_amount ? 'is-invalid' : ''}`}
+              value={lease.rate_amount}
+              onChange={handleChange}
+              required
+            />
+            {validationErrors.rate_amount && (
+              <div className="invalid-feedback">{validationErrors.rate_amount}</div>
+            )}
+          </div>
 
-        <Form.Group controlId="active_lease" className="mt-3">
-          <Form.Check
-            type="checkbox"
-            name="active_lease"
-            label="Active Lease"
-            checked={lease.active_lease}
-            onChange={handleChange}
-          />
-        </Form.Group>
+          <div className="form-check mb-3">
+            <input
+              id="active_lease"
+              name="active_lease"
+              type="checkbox"
+              className="form-check-input"
+              checked={lease.active_lease}
+              onChange={handleChange}
+            />
+            <label htmlFor="active_lease" className="form-check-label">
+              Active Lease
+            </label>
+          </div>
 
-        <Button variant="primary" type="submit" className="mt-4">
-          Save Changes
-        </Button>
-      </Form>
-    </Container>
+          <div className="d-flex justify-content-between">
+            <button type="button" className="btn btn-secondary" onClick={() => navigate('/')}>
+              Cancel
+            </button>
+            <button type="submit" className="btn btn-custom">
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 };
 

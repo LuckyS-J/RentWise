@@ -14,4 +14,4 @@ class LeaseSerializer(serializers.ModelSerializer):
 class PaymentSerializer(serializers.ModelSerializer):
     class Meta:
       model = Payment
-      fields = ['id', 'amount', 'payment_date', 'is_paid']
+      fields = ['id', 'lease', 'amount', 'payment_date', 'is_paid']

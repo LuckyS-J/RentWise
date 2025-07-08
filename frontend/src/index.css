@@ -145,3 +145,26 @@ html, body, #root {
   border-color: #653b9f !important;
   color: #fff !important;
 }
+
+.dark-input,
+.dark-select,
+.dark-textarea {
+  background-color: #1f2a40 !important;
+  color: #ffffff !important;
+  border: 1px solid #4a47a3;
+  font-size: 0.95rem;
+  padding: 6px 10px;
+  height: 38px;
+}
+
+.dark-input::placeholder,
+.dark-textarea::placeholder {
+  color: #aaaaaa;
+}
+
+.dark-input:focus,
+.dark-select:focus,
+.dark-textarea:focus {
+  border-color: #7c4dff;
+  box-shadow: 0 0 0 0.15rem rgba(124, 77, 255, 0.25);
+}

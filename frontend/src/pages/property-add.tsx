@@ -137,9 +137,15 @@ function AddProperty() {
               </div>
             )}
 
-            <button type="submit" className="btn btn-custom w-100" disabled={isSubmitting}>
-              {isSubmitting ? 'Adding...' : 'Add Property'}
-            </button>
+            <div className="d-flex justify-content-between">
+              <button type="button" className="btn btn-secondary" onClick={() => navigate('/')}>
+                Cancel
+              </button>
+              <button type="submit" className="btn btn-custom">
+                Add Lease
+              </button>
+            </div>
+
           </form>
 
         </div>
