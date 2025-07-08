@@ -29,3 +29,34 @@ export const addProperty = async (data: any, accessToken: string) => {
 
   return await response.json();
 };
+
+export const updateProperty = async (id: number, data: any, token: string) => {
+  const response = await fetch(`http://localhost:8000/properties/api/${id}/`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to update property');
+  }
+
+  return await response.json();
+};
+
+export const deleteProperty = async (id: number, token: string) => {
+  const response = await fetch(`http://localhost:8000/properties/api/${id}/`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  });
+  if (!response.ok) {
+    throw new Error('Failed to delete');
+  }
+  return response;
+};

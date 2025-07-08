@@ -25,7 +25,7 @@ function AddProperty() {
       setSubmitError(null);
       const token = localStorage.getItem('access') || '';
       await addProperty(data, token);
-      navigate('/dashboard');
+      navigate('/');
     } catch (err: any) {
       setSubmitError(err.message || 'Failed to add property');
     }

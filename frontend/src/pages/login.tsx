@@ -23,7 +23,7 @@ function Login() {
       const res = await loginUser(data.username, data.password);
       localStorage.setItem('access', res.access);
       localStorage.setItem('refresh', res.refresh);
-      navigate('/dashboard');
+      navigate('/');
     } catch (err: any) {
       setLoginError(err.message);
     }
