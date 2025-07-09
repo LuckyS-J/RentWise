@@ -24,7 +24,7 @@ class Property(models.Model):
 
   address = models.CharField(max_length=150, unique=True, null=False)
   description = models.TextField(null=True, blank=True)
-  owner = models.ForeignKey(CustomUser, null=False, related_name="properties", on_delete=models.CASCADE)
+  owner = models.ForeignKey(CustomUser, null=True, related_name="owned_properties", on_delete=models.CASCADE)
   property_type = models.CharField(choices=PROPERTY_CHOICES, max_length=30)
   status = models.CharField(choices=STATUS_CHOICES, max_length=30)
   area = models.DecimalField(decimal_places=2, max_digits=10, validators=[MinValueValidator(1)])

@@ -9,7 +9,7 @@ class PropertySerializer(serializers.ModelSerializer):
 class LeaseSerializer(serializers.ModelSerializer):
     class Meta:
       model = Lease
-      fields = ['id', 'property', 'start_date', 'end_date', 'rate_amount', 'active_lease']
+      fields = ['id', 'tenant', 'property', 'start_date', 'end_date', 'rate_amount', 'active_lease']
 
 class PaymentSerializer(serializers.ModelSerializer):
     class Meta:
