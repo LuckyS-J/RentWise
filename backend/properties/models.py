@@ -50,8 +50,29 @@ class Lease(models.Model):
     # Checks end date
     if self.end_date < datetime.date.today() or self.end_date < self.start_date:
       raise ValidationError("Invalid end date!")
-    
-    return super().save(*args, **kwargs)
+
+    # Changes status of property & checks if already rented
+    is_new = self.pk is None
+    old = None
+    if not is_new:
+        old = Lease.objects.get(pk=self.pk)
+
+    super().save(*args, **kwargs)
+
+    prop = self.property
+    active_now = self.active_lease and self.start_date <= datetime.date.today() <= self.end_date
+
+    if active_now:
+        prop.status = 'rented'
+    else:
+        has_other = Lease.objects.filter(
+            property=prop,
+            active_lease=True,
+            start_date__lte=datetime.date.today(),
+            end_date__gte=datetime.date.today()
+        ).exclude(pk=self.pk).exists()
+        prop.status = 'rented' if has_other else 'available'
+    prop.save(update_fields=['status'])
  
 class Payment(models.Model):
   lease = models.ForeignKey(Lease, related_name='payments', on_delete=models.CASCADE)

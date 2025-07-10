@@ -78,7 +78,7 @@ class PaymentAPITests(APITestCase):
 
     def test_update_payment(self):
         data = {
-            'lease': self.lease.id,  # <-- dodane!
+            'lease': self.lease.id,
             'amount': '1800.00',
             'payment_date': '2026-04-01',
             'is_paid': True

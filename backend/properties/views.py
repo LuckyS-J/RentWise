@@ -61,7 +61,6 @@ class LeaseViewSet(APIView):
   def post(self, request):
     serializer = LeaseSerializer(data=request.data)
     if serializer.is_valid():
-      serializer.save(tenant=self.request.user)
       serializer.save()
       return Response(serializer.data, status=201)
     else:

@@ -4,51 +4,90 @@ import { useNavigate, useParams } from 'react-router-dom';
 interface Lease {
   id: number;
   property: number;
+  tenant: number;
   start_date: string;
   end_date: string;
   rate_amount: string;
   active_lease: boolean;
 }
 
+interface Tenant {
+  id: number;
+  email: string;
+}
+
+interface Property {
+  id: number;
+  address: string;
+  status: 'available' | 'rented' | 'under_renovation';
+}
+
 const EditLease = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [tenants, setTenants] = useState<Tenant[]>([]);
   const [lease, setLease] = useState<Lease | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [properties, setProperties] = useState<Property[]>([]);
 
   useEffect(() => {
-    const fetchLease = async () => {
-      const access = localStorage.getItem('access');
-      if (!access) {
-        navigate('/login');
-        return;
-      }
+    const access = localStorage.getItem('access');
+    if (!access) {
+      navigate('/login');
+      return;
+    }
 
+    const fetchData = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/properties/api/leases/${id}/`, {
-          headers: {
-            Authorization: `Bearer ${access}`,
-          },
-        });
+        const [leaseRes, tenantsRes] = await Promise.all([
+          fetch(`http://localhost:8000/properties/api/leases/${id}/`, {
+            headers: { Authorization: `Bearer ${access}` },
+          }),
+          fetch('http://localhost:8000/users/api/users/', {
+            headers: { Authorization: `Bearer ${access}` },
+          }),
+        ]);
 
-        if (!res.ok) throw new Error('Failed to fetch lease.');
+        if (!leaseRes.ok) throw new Error('Failed to fetch lease.');
+        if (!tenantsRes.ok) throw new Error('Failed to fetch tenants.');
 
-        const data = await res.json();
-        setLease(data);
+        const leaseData = await leaseRes.json();
+        const tenantsData = await tenantsRes.json();
+
+        setLease(leaseData);
+        setTenants(tenantsData);
       } catch {
-        setError('Failed to load lease.');
+        setError('Failed to load data.');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchLease();
+    const fetchProperties = async () => {
+      try {
+        const res = await fetch('http://localhost:8000/properties/api/', {
+          headers: { Authorization: `Bearer ${access}` },
+        });
+        if (!res.ok) throw new Error('Failed to fetch properties');
+        const data = await res.json();
+        setProperties(data);
+      } catch {
+        setError('Failed to fetch properties.');
+      }
+    };
+
+    fetchProperties();
+    fetchData();
   }, [id, navigate]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const target = e.target as HTMLInputElement | HTMLSelectElement;
+    const { name, value, type } = target;
+
+    const checked = type === 'checkbox' ? (target as HTMLInputElement).checked : undefined;
+
     setLease((prev) =>
       prev
         ? {
@@ -63,6 +102,7 @@ const EditLease = () => {
     const errors: Record<string, string> = {};
     if (!lease) return false;
     if (!lease.property) errors.property = 'Property ID is required';
+    if (!lease.tenant) errors.tenant = 'Tenant is required';
     if (!lease.start_date) errors.start_date = 'Start Date is required';
     if (!lease.end_date) errors.end_date = 'End Date is required';
     if (!lease.rate_amount) errors.rate_amount = 'Rate Amount is required';
@@ -120,19 +160,44 @@ const EditLease = () => {
 
         <form onSubmit={handleSubmit} noValidate>
           <div className="mb-3">
-            <label htmlFor="property" className="form-label">Property ID</label>
-            <input
+            <select
               id="property"
               name="property"
-              type="number"
-              className={`form-control dark-input ${validationErrors.property ? 'is-invalid' : ''}`}
+              className={`form-select dark-input ${validationErrors.property ? 'is-invalid' : ''}`}
               value={lease.property}
               onChange={handleChange}
               required
-            />
-            {validationErrors.property && (
-              <div className="invalid-feedback">{validationErrors.property}</div>
-            )}
+            >
+              <option value="">-- Select property --</option>
+              {properties
+                // pokaż tylko available lub aktualnie ustawione w lease
+                .filter(p => p.status === 'available' || p.id === lease.property)
+                .map(p => (
+                  <option key={p.id} value={p.id}>
+                    {p.address} ({p.status})
+                  </option>
+                ))}
+            </select>
+          </div>
+
+                    <div className="mb-3">
+            <label htmlFor="tenant" className="form-label">Tenant</label>
+            <select
+              id="tenant"
+              name="tenant"
+              className={`form-select dark-input ${validationErrors.tenant ? 'is-invalid' : ''}`}
+              value={lease.tenant}
+              onChange={handleChange}
+              required
+            >
+              <option value="">-- Select tenant --</option>
+              {tenants.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.email}
+                </option>
+              ))}
+            </select>
+            {validationErrors.tenant && <div className="invalid-feedback">{validationErrors.tenant}</div>}
           </div>
 
           <div className="mb-3">

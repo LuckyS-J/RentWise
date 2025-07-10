@@ -4,11 +4,19 @@ import { useNavigate } from 'react-router-dom';
 interface Property {
   id: number;
   address: string;
+  status: 'available' | 'rented' | 'under_renovation';
+}
+
+interface Tenant {
+  id: number;
+  email: string;
 }
 
 const AddLeaseForm = () => {
   const navigate = useNavigate();
   const [propertyId, setPropertyId] = useState<number | ''>('');
+  const [tenantId, setTenantId] = useState<number | ''>('');
+  const [tenants, setTenants] = useState<Tenant[]>([]);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [rateAmount, setRateAmount] = useState('');
@@ -32,11 +40,25 @@ const AddLeaseForm = () => {
       .then((res) => res.json())
       .then((data) => setProperties(data))
       .catch(() => setError('Failed to load properties.'));
+
+    fetch('http://localhost:8000/users/api/users/', {
+      headers: {
+        Authorization: `Bearer ${access}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => setTenants(data))
+      .catch(() => setError('Failed to load tenants.'));
+
   }, [navigate]);
+
+
+
 
   const validateForm = () => {
     const errors: Record<string, string> = {};
     if (propertyId === '') errors.propertyId = 'Property is required';
+    if (tenantId === '') errors.tenantId = 'Tenant is required'; 
     if (!startDate) errors.startDate = 'Start Date is required';
     if (!endDate) errors.endDate = 'End Date is required';
     if (!rateAmount) errors.rateAmount = 'Rate Amount is required';
@@ -54,6 +76,7 @@ const AddLeaseForm = () => {
 
     const payload = {
       property: propertyId,
+      tenant: tenantId, 
       start_date: startDate,
       end_date: endDate,
       rate_amount: rateAmount,
@@ -95,16 +118,41 @@ const AddLeaseForm = () => {
               required
             >
               <option value="">-- Select property --</option>
-              {properties.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.address}
-                </option>
-              ))}
+              {properties
+                .filter(p => p.status === 'available')
+                .map(p => (
+                  <option key={p.id} value={p.id}>
+                    {p.address} ({p.status})
+                  </option>
+                ))}
             </select>
             {validationErrors.propertyId && (
               <div className="invalid-feedback">{validationErrors.propertyId}</div>
             )}
+</div>
+
+
+          <div className="mb-3">
+            <label htmlFor="tenant" className="form-label">Tenant</label>
+            <select
+              id="tenant"
+              className={`form-select dark-input ${validationErrors.tenantId ? 'is-invalid' : ''}`}
+              value={tenantId}
+              onChange={(e) => setTenantId(Number(e.target.value))}
+              required
+            >
+              <option value="">-- Select tenant --</option>
+              {tenants.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.email}
+                </option>
+              ))}
+            </select>
+            {validationErrors.tenantId && (
+              <div className="invalid-feedback">{validationErrors.tenantId}</div>
+            )}
           </div>
+
 
           <div className="mb-3">
             <label htmlFor="startDate" className="form-label">Start Date</label>
