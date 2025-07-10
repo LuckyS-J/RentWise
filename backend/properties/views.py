@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Payment, Property, Lease
-from .serializers import PaymentSerializer, PropertySerializer, LeaseSerializer
+from .serializers import PaymentSerializer, PropertySerializer, LeaseSerializer, LeaseDetailSerializer
 from rest_framework.permissions import IsAuthenticated
 
 # Create your views here.
@@ -72,15 +72,16 @@ class LeaseDetailView(APIView):
 
   def get(self, request, id):
     lease = get_object_or_404(Lease, property__owner=request.user, id=id)
-    serializer = LeaseSerializer(lease)
-    return Response(serializer.data, status=200)
+    serializer = LeaseDetailSerializer(lease)
+    return Response(serializer.data)
     
   def put(self, request, id):
     lease = get_object_or_404(Lease, property__owner=request.user, id=id)
     serializer = LeaseSerializer(instance=lease, data=request.data)
     if serializer.is_valid():
       serializer.save()
-      return Response(serializer.data, status=200)
+      detail = LeaseDetailSerializer(lease)
+      return Response(detail.data, status=200)
     else:
       return Response(serializer.errors, status=400)
     
@@ -130,5 +131,3 @@ class PaymentDetailView(APIView):
     payment = get_object_or_404(Payment, lease__property__owner=request.user, id=id)
     payment.delete()
     return Response(status=204)
-  
-  

@@ -60,7 +60,10 @@ class Lease(models.Model):
     super().save(*args, **kwargs)
 
     prop = self.property
-    active_now = self.active_lease and self.start_date <= datetime.date.today() <= self.end_date
+    if not prop:
+        return
+
+    active_now = self.active_lease
 
     if active_now:
         prop.status = 'rented'
@@ -73,9 +76,23 @@ class Lease(models.Model):
         ).exclude(pk=self.pk).exists()
         prop.status = 'rented' if has_other else 'available'
     prop.save(update_fields=['status'])
+    print(f"Changing status of property {prop.id} to {prop.status}")
+
  
 class Payment(models.Model):
   lease = models.ForeignKey(Lease, related_name='payments', on_delete=models.CASCADE)
   amount = models.DecimalField(decimal_places=2, max_digits=10, validators=[MinValueValidator(0)])
-  payment_date = models.DateField(default=datetime.date.today)
+  due_date = models.DateField(null=True)
+  payment_date = models.DateField(null=True, blank=True)
   is_paid = models.BooleanField(default=False)
+
+  @property
+  def status(self):
+      today = datetime.date.today()
+      if self.is_paid:
+          return 'paid'
+      if self.due_date < today:
+          return 'overdue'
+      if self.due_date <= today + datetime.timedelta(days=3):
+          return 'due_soon'
+      return 'pending'
