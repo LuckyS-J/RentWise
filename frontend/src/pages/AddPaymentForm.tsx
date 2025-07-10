@@ -1,19 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-
-interface Lease {
-  id: number;
-  start_date: string;
-  end_date: string;
-}
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const AddPaymentForm = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [leaseId, setLeaseId] = useState<number | ''>('');
   const [amount, setAmount] = useState('');
   const [paymentDate, setPaymentDate] = useState('');
   const [isPaid, setIsPaid] = useState(false);
-  const [leases, setLeases] = useState<Lease[]>([]);
   const [error, setError] = useState('');
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
@@ -24,18 +18,12 @@ const AddPaymentForm = () => {
       return;
     }
 
-    fetch('http://localhost:8000/properties/api/leases/', {
-      headers: {
-        Authorization: `Bearer ${access}`,
-      },
-    })
-      .then(res => {
-        if (!res.ok) throw new Error('Failed to fetch leases');
-        return res.json();
-      })
-      .then(data => setLeases(data))
-      .catch(() => setError('Failed to load leases.'));
-  }, [navigate]);
+    const queryParams = new URLSearchParams(location.search);
+    const leaseIdFromQuery = queryParams.get('leaseId');
+    if (leaseIdFromQuery) {
+      setLeaseId(Number(leaseIdFromQuery));
+    }
+  }, [navigate, location]);
 
   const validateForm = () => {
     const errors: Record<string, string> = {};
@@ -86,27 +74,6 @@ const AddPaymentForm = () => {
         {error && <div className="alert alert-danger">{error}</div>}
 
         <form onSubmit={handleSubmit} noValidate>
-          <div className="mb-3">
-            <label htmlFor="lease" className="form-label">Lease</label>
-            <select
-              id="lease"
-              className={`form-select dark-input ${validationErrors.leaseId ? 'is-invalid' : ''}`}
-              value={leaseId}
-              onChange={(e) => setLeaseId(Number(e.target.value))}
-              required
-            >
-              <option value="">-- Select Lease --</option>
-              {leases.map((l) => (
-                <option key={l.id} value={l.id}>
-                  {l.start_date} → {l.end_date}
-                </option>
-              ))}
-            </select>
-            {validationErrors.leaseId && (
-              <div className="invalid-feedback">{validationErrors.leaseId}</div>
-            )}
-          </div>
-
           <div className="mb-3">
             <label htmlFor="amount" className="form-label">Amount (PLN)</label>
             <input

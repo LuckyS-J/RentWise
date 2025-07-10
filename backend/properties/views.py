@@ -26,7 +26,6 @@ class PropertyViewSet(APIView):
 
 # Property APIViews
 class PropertyDetailView(APIView):
-
   permission_classes = [IsAuthenticated]
 
   def get(self, request, id):
@@ -67,7 +66,6 @@ class LeaseViewSet(APIView):
       return Response(serializer.errors, status=400)
     
 class LeaseDetailView(APIView):
-
   permission_classes = [IsAuthenticated]
 
   def get(self, request, id):
@@ -110,7 +108,6 @@ class PaymentViewSet(APIView):
 
 
 class PaymentDetailView(APIView):
-
   permission_classes = [IsAuthenticated]
 
   def get(self, request, id):

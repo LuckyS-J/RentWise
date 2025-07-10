@@ -12,7 +12,7 @@ class LeaseSerializer(serializers.ModelSerializer):
       fields = ['id', 'tenant', 'property', 'start_date', 'end_date', 'rate_amount', 'active_lease']
 
 class PaymentSerializer(serializers.ModelSerializer):
-    status = serializers.CharField(source='status', read_only=True)
+    status = serializers.CharField(read_only=True)
 
     class Meta:
       model = Payment

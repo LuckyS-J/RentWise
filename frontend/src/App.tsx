@@ -7,6 +7,7 @@ import AddLeaseForm from './pages/AddLeaseForm'
 import EditLeaseForm from './pages/EditLeaseForm';
 import AddPaymentForm from './pages/AddPaymentForm';
 import EditPaymenForm from './pages/EditPaymentForm';
+import LeaseDetail from './pages/LeaseDetail';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route path="/leases/:id/edit" element={<EditLeaseForm />} />
         <Route path="/payments/add" element={<AddPaymentForm />} />
         <Route path="/payments/:id/edit" element={<EditPaymenForm />} />
+        <Route path="/leases/:id" element={<LeaseDetail />} />
       </Routes>
     </Router>
   );

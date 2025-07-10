@@ -142,7 +142,7 @@ function AddProperty() {
                 Cancel
               </button>
               <button type="submit" className="btn btn-custom">
-                Add Lease
+                Add Property
               </button>
             </div>
 
