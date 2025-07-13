@@ -3,25 +3,28 @@ import Login from './pages/login';
 import Dashboard from './pages/dashboard';
 import AddPropertyForm from './pages/property-add';
 import EditProperty from './pages/property-edit';
-import AddLeaseForm from './pages/AddLeaseForm'
+import AddLeaseForm from './pages/AddLeaseForm';
 import EditLeaseForm from './pages/EditLeaseForm';
 import AddPaymentForm from './pages/AddPaymentForm';
 import EditPaymenForm from './pages/EditPaymentForm';
 import LeaseDetail from './pages/LeaseDetail';
+import RequireAuth from './components/requireAuth';
+import Register from './pages/Register';
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/" element={<RequireAuth><Dashboard /></RequireAuth>} />
         <Route path="/login" element={<Login />} />
-        <Route path="/properties/add" element={<AddPropertyForm />} />
-        <Route path="/properties/:id/edit" element={<EditProperty />} />
-        <Route path="/leases/add" element={<AddLeaseForm />} />
-        <Route path="/leases/:id/edit" element={<EditLeaseForm />} />
-        <Route path="/payments/add" element={<AddPaymentForm />} />
-        <Route path="/payments/:id/edit" element={<EditPaymenForm />} />
-        <Route path="/leases/:id" element={<LeaseDetail />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/properties/add" element={<RequireAuth><AddPropertyForm /></RequireAuth>} />
+        <Route path="/properties/:id/edit" element={<RequireAuth><EditProperty /></RequireAuth>} />
+        <Route path="/leases/add" element={<RequireAuth><AddLeaseForm /></RequireAuth>} />
+        <Route path="/leases/:id/edit" element={<RequireAuth><EditLeaseForm /></RequireAuth>} />
+        <Route path="/payments/add" element={<RequireAuth><AddPaymentForm /></RequireAuth>} />
+        <Route path="/payments/:id/edit" element={<RequireAuth><EditPaymenForm /></RequireAuth>} />
+        <Route path="/leases/:id" element={<RequireAuth><LeaseDetail /></RequireAuth>} />
       </Routes>
     </Router>
   );

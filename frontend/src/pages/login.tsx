@@ -23,6 +23,7 @@ function Login() {
       const res = await loginUser(data.username, data.password);
       localStorage.setItem('access', res.access);
       localStorage.setItem('refresh', res.refresh);
+      localStorage.setItem('username', data.username);
       navigate('/');
     } catch (err: any) {
       setLoginError(err.message);
@@ -80,6 +81,15 @@ function Login() {
             {isSubmitting ? 'Logging in...' : 'Login'}
           </button>
         </form>
+        <p className="mt-3 text-center" style={{ color: '#c8c8ff' }}>
+          Don't have an account?{' '}
+          <span
+            style={{ cursor: 'pointer', color: '#7c4dff', textDecoration: 'underline' }}
+            onClick={() => navigate('/register')}
+          >
+            Register here
+          </span>
+        </p>
       </div>
     </div>
   );
