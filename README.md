@@ -163,3 +163,31 @@ Create a file named `.env` in the project root and add the following environment
     ```bash
    docker-compose down
     ```
+---
+
+## 📸 Screenshots
+
+### Index
+<p style="text-align: center;">
+  <img src="screenshots/Dashboard.png" alt="Dahsboard" width="700"/>
+</p>
+
+### Transactions list
+<p style="text-align: center;">
+  <img src="screenshots/LeaseDetails.png" alt="Lease Details" width="700"/>
+</p>
+
+### Form example
+<p style="text-align: center;">
+  <img src="screenshots/GeneratedPDF.png" alt="Generated PDF" width="700"/>
+</p>
+
+### Goals list
+<p style="text-align: center;">
+  <img src="screenshots/AddPropertyForm.png" alt="Add Property Form" width="700"/>
+</p>
+
+### Charts
+<p style="text-align: center;">
+  <img src="screenshots/EditLeaseForm.png" alt="Edit Lease Form" width="700"/>
+</p>
