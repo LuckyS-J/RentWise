@@ -114,7 +114,11 @@ const EditProperty = () => {
                 onChange={handleChange}
               >
                 <option value="apartment">Apartment</option>
-                <option value="house">House</option>
+                <option value="room">Room</option>
+                <option value="office">Office</option>
+                <option value="industrial">Industrial</option>
+                <option value="town_house">Town House</option>
+                <option value="bungalow">Bungalow</option>
               </select>
             </div>
 

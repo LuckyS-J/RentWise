@@ -76,7 +76,6 @@ class Lease(models.Model):
         ).exclude(pk=self.pk).exists()
         prop.status = 'rented' if has_other else 'available'
     prop.save(update_fields=['status'])
-    print(f"Changing status of property {prop.id} to {prop.status}")
 
  
 class Payment(models.Model):
@@ -91,6 +90,8 @@ class Payment(models.Model):
       today = datetime.date.today()
       if self.is_paid:
           return 'paid'
+      if self.due_date is None:
+        return 'unknown'
       if self.due_date < today:
           return 'overdue'
       if self.due_date <= today + datetime.timedelta(days=3):

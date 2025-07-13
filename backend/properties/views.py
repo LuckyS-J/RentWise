@@ -46,6 +46,7 @@ class PropertyDetailView(APIView):
       serializer.save()
       return Response(serializer.data, status=200)
     else:
+      print(serializer.errors)
       return Response(serializer.errors, status=400)
     
   def delete(self, request, id):
@@ -87,6 +88,7 @@ class LeaseDetailView(APIView):
       detail = LeaseDetailSerializer(lease)
       return Response(detail.data, status=200)
     else:
+      print(serializer.errors)
       return Response(serializer.errors, status=400)
     
   def delete(self, request, id):

@@ -41,23 +41,33 @@ const EditLease = () => {
 
     const fetchData = async () => {
       try {
-        const [leaseRes, tenantsRes] = await Promise.all([
+        const [leaseRes, tenantsRes, propertiesRes] = await Promise.all([
           fetch(`http://localhost:8000/properties/api/leases/${id}/`, {
             headers: { Authorization: `Bearer ${access}` },
           }),
           fetch('http://localhost:8000/users/api/users/', {
             headers: { Authorization: `Bearer ${access}` },
           }),
+          fetch('http://localhost:8000/properties/api/', {
+            headers: { Authorization: `Bearer ${access}` },
+          }),
         ]);
 
         if (!leaseRes.ok) throw new Error('Failed to fetch lease.');
         if (!tenantsRes.ok) throw new Error('Failed to fetch tenants.');
+        if (!propertiesRes.ok) throw new Error('Failed to fetch properties.');
 
         const leaseData = await leaseRes.json();
         const tenantsData = await tenantsRes.json();
+        const propertiesData = await propertiesRes.json();
 
-        setLease(leaseData);
+        setLease({
+          ...leaseData,
+          property: typeof leaseData.property === 'object' ? leaseData.property.id : leaseData.property,
+          tenant: typeof leaseData.tenant === 'object' ? leaseData.tenant.id : leaseData.tenant,
+        });
         setTenants(tenantsData);
+        setProperties(propertiesData);
       } catch {
         setError('Failed to load data.');
       } finally {
@@ -65,34 +75,26 @@ const EditLease = () => {
       }
     };
 
-    const fetchProperties = async () => {
-      try {
-        const res = await fetch('http://localhost:8000/properties/api/', {
-          headers: { Authorization: `Bearer ${access}` },
-        });
-        if (!res.ok) throw new Error('Failed to fetch properties');
-        const data = await res.json();
-        setProperties(data);
-      } catch {
-        setError('Failed to fetch properties.');
-      }
-    };
-
-    fetchProperties();
     fetchData();
   }, [id, navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const target = e.target as HTMLInputElement | HTMLSelectElement;
-    const { name, value, type } = target;
+    const target = e.target;
+    const { name, type } = target;
 
-    const checked = type === 'checkbox' ? (target as HTMLInputElement).checked : undefined;
+    let value: string | boolean;
+
+    if (type === 'checkbox' && target instanceof HTMLInputElement) {
+      value = target.checked;
+    } else {
+      value = target.value;
+    }
 
     setLease((prev) =>
       prev
         ? {
             ...prev,
-            [name]: type === 'checkbox' ? checked : value,
+            [name]: value,
           }
         : null
     );
@@ -118,6 +120,14 @@ const EditLease = () => {
     const access = localStorage.getItem('access');
     if (!access || !lease) return;
 
+    const payload = {
+      ...lease,
+      property: Number(lease.property),
+      tenant: Number(lease.tenant),
+      rate_amount: String(lease.rate_amount),
+      active_lease: Boolean(lease.active_lease),
+    };
+
     try {
       const res = await fetch(`http://localhost:8000/properties/api/leases/${id}/`, {
         method: 'PUT',
@@ -125,14 +135,17 @@ const EditLease = () => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${access}`,
         },
-        body: JSON.stringify(lease),
+        body: JSON.stringify(payload),
       });
 
-      if (!res.ok) throw new Error('Failed to update lease');
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(JSON.stringify(errData));
+      }
 
       navigate('/');
-    } catch {
-      setError('Failed to update lease.');
+    } catch (err: any) {
+      setError('Failed to update lease: ' + (err.message || err));
     }
   };
 
@@ -170,9 +183,8 @@ const EditLease = () => {
             >
               <option value="">-- Select property --</option>
               {properties
-                // pokaż tylko available lub aktualnie ustawione w lease
-                .filter(p => p.status === 'available' || p.id === lease.property)
-                .map(p => (
+                .filter((p) => p.status === 'available' || p.id === lease.property)
+                .map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.address} ({p.status})
                   </option>
@@ -180,8 +192,10 @@ const EditLease = () => {
             </select>
           </div>
 
-                    <div className="mb-3">
-            <label htmlFor="tenant" className="form-label">Tenant</label>
+          <div className="mb-3">
+            <label htmlFor="tenant" className="form-label">
+              Tenant
+            </label>
             <select
               id="tenant"
               name="tenant"
@@ -201,7 +215,9 @@ const EditLease = () => {
           </div>
 
           <div className="mb-3">
-            <label htmlFor="start_date" className="form-label">Start Date</label>
+            <label htmlFor="start_date" className="form-label">
+              Start Date
+            </label>
             <input
               id="start_date"
               name="start_date"
@@ -211,13 +227,13 @@ const EditLease = () => {
               onChange={handleChange}
               required
             />
-            {validationErrors.start_date && (
-              <div className="invalid-feedback">{validationErrors.start_date}</div>
-            )}
+            {validationErrors.start_date && <div className="invalid-feedback">{validationErrors.start_date}</div>}
           </div>
 
           <div className="mb-3">
-            <label htmlFor="end_date" className="form-label">End Date</label>
+            <label htmlFor="end_date" className="form-label">
+              End Date
+            </label>
             <input
               id="end_date"
               name="end_date"
@@ -227,13 +243,13 @@ const EditLease = () => {
               onChange={handleChange}
               required
             />
-            {validationErrors.end_date && (
-              <div className="invalid-feedback">{validationErrors.end_date}</div>
-            )}
+            {validationErrors.end_date && <div className="invalid-feedback">{validationErrors.end_date}</div>}
           </div>
 
           <div className="mb-3">
-            <label htmlFor="rate_amount" className="form-label">Rate Amount (PLN)</label>
+            <label htmlFor="rate_amount" className="form-label">
+              Rate Amount (PLN)
+            </label>
             <input
               id="rate_amount"
               name="rate_amount"
@@ -245,9 +261,7 @@ const EditLease = () => {
               onChange={handleChange}
               required
             />
-            {validationErrors.rate_amount && (
-              <div className="invalid-feedback">{validationErrors.rate_amount}</div>
-            )}
+            {validationErrors.rate_amount && <div className="invalid-feedback">{validationErrors.rate_amount}</div>}
           </div>
 
           <div className="form-check mb-3">
