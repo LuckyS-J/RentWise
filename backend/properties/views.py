@@ -1,8 +1,14 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Payment, Property, Lease
 from .serializers import PaymentSerializer, PropertySerializer, LeaseSerializer, LeaseDetailSerializer
+from rest_framework.permissions import IsAuthenticated
+from django.http import HttpResponse
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+import datetime
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 
 # Create your views here.
@@ -128,3 +134,31 @@ class PaymentDetailView(APIView):
     payment = get_object_or_404(Payment, lease__property__owner=request.user, id=id)
     payment.delete()
     return Response(status=204)
+  
+
+def render_to_pdf(template_src, context_dict={}):
+    template = get_template(template_src)
+    html = template.render(context_dict)
+    response = HttpResponse(content_type='application/pdf')
+    pisa_status = pisa.CreatePDF(html, dest=response)
+    if pisa_status.err:
+        return None
+    return response
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def lease_contract_pdf(request, pk):
+    lease = get_object_or_404(Lease.objects.select_related('tenant', 'property'), pk=pk)
+    user = request.user
+
+    if user != lease.tenant and user != lease.property.owner:
+        return Response({'detail': 'Unauthorized'}, status=401)
+
+    context = {
+        'lease': lease,
+        'today': datetime.date.today()
+    }
+    pdf_response = render_to_pdf('properties/contract_template.html', context)
+    if not pdf_response:
+        return Response({'detail': 'Error while generating PDF'}, status=500)
+    return pdf_response

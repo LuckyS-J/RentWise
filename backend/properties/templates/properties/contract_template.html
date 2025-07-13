@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lease Agreement</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 13px;
+            color: #222;
+            padding: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #4e3184;
+            border-bottom: 2px solid #4e3184;
+            padding-bottom: 4px;
+            margin-bottom: 30px;
+        }
+
+        .section {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #999;
+            background-color: #f9f9ff;
+        }
+
+        .section-title {
+            background-color: #4e3184;
+            color: #fff;
+            padding: 5px 10px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .section-content {
+            padding: 10px 10px 0 10px;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #000;
+        }
+
+        .contract-paragraph {
+            margin-top: 20px;
+            text-align: justify;
+        }
+
+        .signatures {
+            margin-top: 50px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .signature-box {
+            width: 45%;
+            text-align: center;
+        }
+
+        .signature-line {
+            margin-top: 50px;
+            border-top: 1px solid #000;
+            padding-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Lease Agreement</h1>
+
+    <div class="section">
+        <div class="section-title">General Info</div>
+        <div class="section-content">
+            <div><span class="label">Date:</span> {{ today }}</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Tenant Information</div>
+        <div class="section-content">
+            <div><span class="label">Name:</span> {{ lease.tenant.first_name }} {{ lease.tenant.last_name }}</div>
+            <div><span class="label">Email:</span> {{ lease.tenant.email }}</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Property Details</div>
+        <div class="section-content">
+            <div><span class="label">Address:</span> {{ lease.property.address }}</div>
+            <div><span class="label">Type:</span> {{ lease.property.property_type|title }}</div>
+            <div><span class="label">Area:</span> {{ lease.property.area }} m²</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Lease Terms</div>
+        <div class="section-content">
+            <div><span class="label">Start Date:</span> {{ lease.start_date }}</div>
+            <div><span class="label">End Date:</span> {{ lease.end_date }}</div>
+            <div><span class="label">Monthly Rate:</span> {{ lease.rate_amount }} PLN</div>
+        </div>
+    </div>
+
+    <div class="contract-paragraph">
+        The tenant agrees to rent the property listed above for the period specified and to comply with all terms of the lease agreement.
+        This contract is legally binding once signed by both parties.
+    </div>
+
+    <table width="100%" style="margin-top: 10px;">
+      <tr>
+        <td style="width: 50%; text-align: center;">
+          ___________________________<br>
+          Tenant Signature
+        </td>
+        <td style="width: 50%; text-align: center;">
+          ___________________________<br>
+          Landlord Signature
+        </td>
+      </tr>
+    </table>
+</body>
+</html>

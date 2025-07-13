@@ -8,4 +8,5 @@ urlpatterns = [
     path('api/leases/<int:id>/', views.LeaseDetailView.as_view(), name='lease-detail'),
     path('api/payments/', views.PaymentViewSet.as_view(), name='payment-list'),
     path('api/payments/<int:id>/', views.PaymentDetailView.as_view(), name='payment-detail'),
+    path('leases/<int:pk>/contract/', views.lease_contract_pdf, name='lease_contract_pdf'),
 ]

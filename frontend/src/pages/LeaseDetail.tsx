@@ -1,13 +1,37 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { fetchLeaseDetail } from '../api/lease';
-import { Card, Button, Container, Row, Col } from 'react-bootstrap';
+import { Card, Button, Row, Col } from 'react-bootstrap';
+import axios from 'axios';
 
 const LeaseDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [lease, setLease] = useState<any>(null);
   const [error, setError] = useState('');
+
+const previewContractPdf = async () => {
+  const access = localStorage.getItem('access');
+  if (!access) {
+    setError('You must be logged in to view the contract.');
+    return;
+  }
+
+  try {
+    const response = await axios.get(`http://localhost:8000/properties/leases/${lease.id}/contract/`, {
+      headers: {
+        Authorization: `Bearer ${access}`,
+      },
+      responseType: 'blob',
+    });
+
+    const file = new Blob([response.data], { type: 'application/pdf' });
+    const fileURL = URL.createObjectURL(file);
+    window.open(fileURL);
+  } catch (error) {
+    setError('Failed to load contract PDF preview.');
+  }
+};
 
   useEffect(() => {
     const access = localStorage.getItem('access');
@@ -83,6 +107,9 @@ const LeaseDetail = () => {
                   onClick={() => navigate(`/payments/add?leaseId=${lease.id}`)}
                 >
                   Add Payment
+                </Button>
+                <Button className="btn-dark" onClick={previewContractPdf}>
+                  Preview Contract PDF
                 </Button>
               </div>
             </Card.Body>
