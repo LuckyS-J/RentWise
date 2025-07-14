@@ -23,6 +23,19 @@ interface Lease {
   active_lease: boolean;
 }
 
+
+function isTokenValid(token: string | null): boolean {
+  if (!token) return false;
+
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const now = Math.floor(Date.now() / 1000);
+    return payload.exp > now;
+  } catch (e) {
+    return false;
+  }
+}
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const [properties, setProperties] = useState<Property[]>([]);
@@ -31,7 +44,10 @@ const Dashboard = () => {
 
   useEffect(() => {
     const access = localStorage.getItem('access');
-    if (!access) {
+
+    if (!isTokenValid(access)) {
+      localStorage.removeItem('access');
+      localStorage.removeItem('refresh');
       navigate('/login');
       return;
     }
@@ -39,8 +55,8 @@ const Dashboard = () => {
     const fetchAllData = async () => {
       try {
         const [props, ls] = await Promise.all([
-          fetchProperties(access),
-          fetchLeases(access),
+          fetchProperties(access!),
+          fetchLeases(access!),
         ]);
         setProperties(props);
         setLeases(ls);
